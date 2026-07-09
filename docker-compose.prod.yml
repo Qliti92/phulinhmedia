@@ -1,0 +1,55 @@
+services:
+  web:
+    build: .
+    env_file: .env
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - media:/app/media
+      - staticfiles:/app/staticfiles
+      - backups:/app/backups
+    ports:
+      - "127.0.0.1:8000:8000"
+    command: gunicorn phulinhmedia.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120
+
+  celery:
+    build: .
+    env_file: .env
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - media:/app/media
+      - backups:/app/backups
+    command: celery -A phulinhmedia worker -l info
+
+  celery-beat:
+    build: .
+    env_file: .env
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - media:/app/media
+      - backups:/app/backups
+    command: celery -A phulinhmedia beat -l info
+
+  db:
+    image: postgres:16-alpine
+    env_file: .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+
+volumes:
+  postgres_data:
+  staticfiles:
+  media:
+  backups:
