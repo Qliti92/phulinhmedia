@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block heading %}Import Excel domain{% endblock %}
+{% block content %}
+<div class="toolbar"><a class="btn" href="{% url 'import_create' %}">Tải file Excel</a></div>
+<div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>File</th><th>Tổng dòng</th><th>Hợp lệ</th><th>Lỗi</th><th>Trùng file</th><th>Trùng hệ thống</th><th>Đã import</th><th></th></tr></thead>
+    <tbody>
+      {% for s in object_list %}
+        <tr><td><strong>{{ s.original_file_name }}</strong></td><td>{{ s.total_rows }}</td><td>{{ s.valid_rows }}</td><td>{{ s.error_rows }}</td><td>{{ s.duplicate_in_file }}</td><td>{{ s.duplicate_in_system }}</td><td>{{ s.imported_success }}</td><td><a class="link" href="{% url 'import_detail' s.pk %}">Xem</a></td></tr>
+      {% empty %}
+        <tr><td colspan="8" class="empty">Chưa có phiên import</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

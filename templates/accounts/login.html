@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Đăng nhập PhuLinhMedia</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body class="login-body">
+  <main class="login-shell refined-login">
+    <section class="login-hero">
+      <div class="brand-mark large">PL</div>
+      <p class="eyebrow">Project Operations</p>
+      <h1>PhuLinhMedia</h1>
+      <p>Quản lý dự án, công việc, deadline, chấm công và hiệu suất đội nhóm trong một không gian nội bộ rõ ràng.</p>
+      <div class="login-metrics">
+        <span>Dự án</span>
+        <span>Công việc</span>
+        <span>Báo cáo</span>
+        <span>Telegram</span>
+      </div>
+    </section>
+
+    <form method="post" class="login-card">
+      {% csrf_token %}
+      <p class="eyebrow">Đăng nhập hệ thống</p>
+      <h2>Chào mừng trở lại</h2>
+      <p class="login-helper">Sử dụng email nội bộ để truy cập workspace.</p>
+      {{ form.non_field_errors }}
+      <label>Email</label>
+      <input class="input" type="email" name="username" autocomplete="email" required autofocus>
+      <label>Mật khẩu</label>
+      <input class="input" type="password" name="password" autocomplete="current-password" required>
+      <button class="btn btn-full">Đăng nhập</button>
+    </form>
+  </main>
+</body>
+</html>

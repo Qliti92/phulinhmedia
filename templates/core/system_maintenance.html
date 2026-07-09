@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Quản trị hệ thống{% endblock %}
+{% block heading %}Quản trị hệ thống{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid">
+  <section class="panel">
+    <h2 class="panel-title">Telegram bot</h2>
+    <form method="post" action="{% url 'system_maintenance_action' %}">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="save_telegram">
+      {{ settings_form.as_p }}
+      <div class="actions-row">
+        <button class="btn" type="submit">Lưu cấu hình</button>
+        <button class="btn-muted" type="submit" name="action" value="fetch_telegram_chats">Lấy Chat ID</button>
+        <button class="btn-muted" type="submit" name="action" value="test_telegram">Gửi test</button>
+      </div>
+    </form>
+    <div class="section-gap">
+      <h3 class="panel-title">Cách lấy Chat ID</h3>
+      <div class="status-list">
+        <div><span>1. Lưu Bot Token trước.</span><b>BotFather</b></div>
+        <div><span>2. Mở Telegram, tìm bot của bạn và nhắn /start.</span><b>/start</b></div>
+        <div><span>3. Quay lại đây bấm Lấy Chat ID, rồi copy ID vào ô Chat ID test.</span><b>getUpdates</b></div>
+      </div>
+    </div>
+    {% if telegram_chats %}
+      <div class="section-gap">
+        <h3 class="panel-title">Chat ID tìm thấy</h3>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Chat ID</th><th>Tên</th><th>Loại</th><th>Tin nhắn gần nhất</th></tr></thead>
+            <tbody>
+              {% for chat in telegram_chats %}
+                <tr>
+                  <td><strong>{{ chat.id }}</strong></td>
+                  <td>{{ chat.name }}{% if chat.username %} @{{ chat.username }}{% endif %}</td>
+                  <td><span class="badge">{{ chat.type }}</span></td>
+                  <td>{{ chat.text|default:"-" }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% endif %}
+  </section>
+
+  <section class="panel">
+    <h2 class="panel-title">Backup dữ liệu</h2>
+    <form method="post" action="{% url 'system_maintenance_action' %}">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="create_backup">
+      <p class="muted">Backup lưu toàn bộ dữ liệu hệ thống, bao gồm tài khoản, cấu hình, dự án, công việc, chấm công, import, thông báo và log.</p>
+      <button class="btn" type="submit">Tạo backup ngay</button>
+    </form>
+    <form class="section-gap" method="post" action="{% url 'system_maintenance_action' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="upload_backup">
+      {{ upload_form.as_p }}
+      <button class="btn-muted" type="submit">Tải backup lên</button>
+    </form>
+    <div class="section-gap">
+      <h3 class="panel-title">File gần đây</h3>
+      <div class="status-list">
+        {% for backup in backups %}
+          <div>
+            <span>{{ backup.name }}</span>
+            <b>{{ backup.created_at|date:"d/m/y H:i" }}</b>
+            <a class="link" href="{% url 'backup_download' backup.name %}">Tải về</a>
+          </div>
+        {% empty %}
+          <p class="empty">Chưa có backup.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="dashboard-grid section-gap">
+  <section class="panel">
+    <h2 class="panel-title">Restore toàn bộ data</h2>
+    <form method="post" action="{% url 'system_maintenance_action' %}">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="restore_backup">
+      {{ restore_form.as_p }}
+      <p class="muted">Restore sẽ thay toàn bộ dữ liệu ứng dụng bằng file backup đã chọn.</p>
+      <button class="btn" type="submit">Restore dữ liệu</button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2 class="panel-title">Xóa sạch data</h2>
+    <form method="post" action="{% url 'system_maintenance_action' %}">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="wipe_data">
+      {{ wipe_form.as_p }}
+      <p class="muted">Hệ thống sẽ tự tạo backup toàn bộ trước khi xóa dữ liệu nghiệp vụ. Tài khoản vẫn được giữ lại.</p>
+      <button class="btn" type="submit">Xóa dữ liệu nghiệp vụ</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

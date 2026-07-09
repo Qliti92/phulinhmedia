@@ -1,0 +1,70 @@
+{% load static %}
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}PhuLinhMedia{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">PL</div>
+        <div>
+          <div class="brand-name">PhuLinhMedia</div>
+          <div class="brand-subtitle">Quản lý dự án nội bộ</div>
+        </div>
+      </div>
+      <nav class="nav">
+        <a class="nav-link" href="{% url 'dashboard' %}"><span>DB</span>Dashboard</a>
+        <a class="nav-link" href="{% url 'projects' %}"><span>DA</span>Dự án</a>
+        <a class="nav-link" href="{% url 'tasks' %}"><span>CV</span>Công việc</a>
+        <a class="nav-link" href="{% url 'attendance' %}"><span>CC</span>Chấm công</a>
+        <a class="nav-link" href="{% url 'reports' %}"><span>BC</span>Báo cáo</a>
+        {% if not request.user.is_admin_role %}
+          <a class="nav-link" href="{% url 'telegram_connection' %}"><span>TG</span>Telegram</a>
+        {% endif %}
+        {% if request.user.is_admin_role %}
+          <a class="nav-link" href="{% url 'users' %}"><span>TK</span>Tài khoản</a>
+          <a class="nav-link" href="{% url 'system_maintenance' %}"><span>HT</span>Hệ thống</a>
+        {% endif %}
+      </nav>
+      <div class="sidebar-user">
+        <div class="avatar">{{ request.user.full_name|default:request.user.email|slice:":1" }}</div>
+        <div>
+          <div class="sidebar-user-name">{{ request.user.full_name|default:request.user.email }}</div>
+          <div class="sidebar-user-role">{{ request.user.get_role_display|default:"User" }}</div>
+        </div>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div class="page-heading">
+          <p class="eyebrow">PhuLinhMedia Workspace</p>
+          <h1>{% block heading %}Dashboard{% endblock %}</h1>
+          <p>Điều phối dự án, nhân sự và tiến trình xử lý domain.</p>
+        </div>
+        <div class="top-actions">
+          <form class="global-search" action="{% url 'projects' %}" method="get">
+            <input name="q" placeholder="Tìm domain nhanh">
+          </form>
+          <a class="notification-pill" href="{% url 'notifications' %}" title="Thông báo">
+            <span class="bell-icon"></span>
+            {% if unread_notifications_count %}<strong>{{ unread_notifications_count }}</strong>{% endif %}
+          </a>
+          <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="btn-muted">Đăng xuất</button></form>
+        </div>
+      </header>
+      <section class="content">
+        {% for message in messages %}<div class="notice">{{ message }}</div>{% endfor %}
+        {% block content %}{% endblock %}
+      </section>
+    </main>
+  </div>
+  <script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Báo cáo{% endblock %}
+{% block heading %}Báo cáo tổng hợp{% endblock %}
+
+{% block content %}
+<div class="page-tools compact-tools">
+  <form class="filter-bar" method="get">
+    <select class="input" name="period">
+      <option value="week" {% if period == "week" %}selected{% endif %}>Tuần này</option>
+      <option value="month" {% if period == "month" %}selected{% endif %}>Tháng</option>
+      <option value="quarter" {% if period == "quarter" %}selected{% endif %}>Quý</option>
+      <option value="year" {% if period == "year" %}selected{% endif %}>Năm</option>
+    </select>
+    <input class="input" type="number" name="year" value="{{ request.GET.year|default:start.year }}" min="2020" max="2100">
+    <input class="input" type="number" name="month" value="{{ request.GET.month|default:start.month }}" min="1" max="12">
+    <input class="input" type="number" name="quarter" value="{{ request.GET.quarter|default:1 }}" min="1" max="4">
+    <button class="btn">Xem báo cáo</button>
+  </form>
+  <div class="tool-actions">
+    <a class="btn-muted" href="{% url 'export_projects' %}">Xuất dự án</a>
+    <a class="btn-muted" href="{% url 'export_tasks' %}">Xuất công việc</a>
+    <a class="btn-muted" href="{% url 'export_performance' %}">Xuất hiệu suất</a>
+  </div>
+</div>
+
+<section class="hero-panel">
+  <div>
+    <p class="eyebrow">Kỳ báo cáo</p>
+    <h2>{{ period_label }}</h2>
+  </div>
+  <div class="hero-badges">
+    <span>{{ start|date:"d/m/Y" }}</span>
+    <span>{{ end|date:"d/m/Y" }}</span>
+  </div>
+</section>
+
+<div class="stats-grid">
+  <div class="stat accent-blue"><span>Dự án tổng</span><strong>{{ projects_total }}</strong></div>
+  <div class="stat accent-violet"><span>Dự án hoàn thành</span><strong>{{ projects_done }}</strong></div>
+  <div class="stat accent-amber"><span>Công việc tổng</span><strong>{{ tasks_total }}</strong></div>
+  <div class="stat accent-rose"><span>Công việc quá hạn</span><strong>{{ tasks_overdue }}</strong></div>
+</div>
+
+<div class="dashboard-grid">
+  <section class="panel">
+    <h2 class="panel-title">Công việc theo trạng thái</h2>
+    <div class="status-list">
+      {% for item in tasks_by_status %}
+        <div><span>{{ item.label }}</span><b>{{ item.total }}</b></div>
+      {% empty %}
+        <p class="empty">Chưa có dữ liệu.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2 class="panel-title">Chấm công trong kỳ</h2>
+    <div class="status-list">
+      {% for item in attendance_summary %}
+        <div><span>{{ item.label }}</span><b>{{ item.total }}</b></div>
+      {% empty %}
+        <p class="empty">Chưa có dữ liệu chấm công.</p>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+
+<section class="panel section-gap">
+  <div class="toolbar">
+    <h2 class="panel-title">Bảng xếp hạng năng lực</h2>
+    {% if request.user.is_admin_role %}
+      <form method="post" action="{% url 'ranking_visibility' %}">
+        {% csrf_token %}
+        <label class="inline-toggle">
+          <input type="checkbox" name="ranking_visible_to_staff" {% if ranking_visible_to_staff %}checked{% endif %}>
+          Cho nhân viên xem bảng xếp hạng
+        </label>
+        <button class="btn-muted">Lưu</button>
+      </form>
+    {% endif %}
+  </div>
+  {% if can_view_ranking %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Hạng</th><th>Nhân viên</th><th>Được giao</th><th>Hoàn thành</th><th>Quá hạn</th><th>Vướng mắc</th><th>Tỷ lệ</th><th>Điểm</th><th>Đánh giá</th></tr></thead>
+        <tbody>
+          {% for item in ranking %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td><strong>{{ item.staff.full_name|default:item.staff.email }}</strong></td>
+              <td>{{ item.total_assigned }}</td>
+              <td>{{ item.total_done }}</td>
+              <td>{{ item.overdue }}</td>
+              <td>{{ item.blocked }}</td>
+              <td>{{ item.completion_rate }}%</td>
+              <td><strong>{{ item.score }}</strong></td>
+              <td>
+                {% if item.score >= 90 %}<span class="badge badge-ok">Xuất sắc</span>
+                {% elif item.score >= 70 %}<span class="badge">Tốt</span>
+                {% elif item.score >= 50 %}<span class="badge badge-warn">Cần cải thiện</span>
+                {% else %}<span class="badge badge-danger">Cần hỗ trợ</span>{% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="9" class="empty">Chưa có dữ liệu xếp hạng.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="empty">Admin chưa bật hiển thị bảng xếp hạng cho nhân viên.</p>
+  {% endif %}
+</section>
+{% endblock %}

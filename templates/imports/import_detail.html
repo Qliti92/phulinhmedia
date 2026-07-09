@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block heading %}Preview import{% endblock %}
+{% block content %}
+<section class="panel">
+  <div class="mini-stats">
+    <div><span class="muted">Tổng</span><b>{{ object.total_rows }}</b></div>
+    <div><span class="muted">Hợp lệ mới</span><b>{{ object.valid_rows }}</b></div>
+    <div><span class="muted">Lỗi</span><b>{{ object.error_rows }}</b></div>
+    <div><span class="muted">Trùng file</span><b>{{ object.duplicate_in_file }}</b></div>
+    <div><span class="muted">Trùng hệ thống</span><b>{{ object.duplicate_in_system }}</b></div>
+    <div><span class="muted">Đã import</span><b>{{ object.imported_success }}</b></div>
+  </div>
+  <div class="actions-row">
+    {% if not object.committed %}<form method="post" action="{% url 'import_commit' object.pk %}">{% csrf_token %}<button class="btn">Lưu domain hợp lệ</button></form>{% endif %}
+    <a class="btn-muted" href="{% url 'import_report' object.pk %}">Tải báo cáo</a>
+  </div>
+</section>
+<div class="table-wrap section-gap">
+  <table class="table">
+    <thead><tr><th>Dòng</th><th>Gốc</th><th>Domain</th><th>Trạng thái</th><th>Lỗi</th></tr></thead>
+    <tbody>
+      {% for row in object.rows.all %}
+        <tr><td>{{ row.row_number }}</td><td>{{ row.raw_value }}</td><td><strong>{{ row.domain }}</strong></td><td>{% if row.is_duplicate_system %}<span class="badge badge-warn">Trùng hệ thống</span>{% elif row.is_duplicate_file %}<span class="badge badge-warn">Trùng file</span>{% elif row.is_valid %}<span class="badge badge-ok">Hợp lệ</span>{% else %}<span class="badge badge-danger">Lỗi</span>{% endif %}</td><td>{{ row.error_message }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

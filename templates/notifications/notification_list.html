@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block heading %}Thông báo{% endblock %}
+{% block content %}
+<div class="page-tools compact-tools">
+  <form class="filter-bar" method="get">
+    <select class="input" name="status">
+      <option value="">Tất cả trạng thái</option>
+      <option value="unread" {% if request.GET.status == "unread" %}selected{% endif %}>Chưa đọc</option>
+      <option value="read" {% if request.GET.status == "read" %}selected{% endif %}>Đã đọc</option>
+    </select>
+    <select class="input" name="event_type">
+      <option value="">Tất cả loại thông báo</option>
+      {% for value,label in event_types %}<option value="{{ value }}" {% if request.GET.event_type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <button class="btn">Lọc</button>
+  </form>
+  <form method="post" action="{% url 'notifications_mark_all_read' %}">
+    {% csrf_token %}
+    <button class="btn-muted">Đánh dấu tất cả đã đọc</button>
+  </form>
+</div>
+
+<section class="panel">
+  <div class="notification-list">
+    {% for item in object_list %}
+      <article class="notification-item {% if not item.is_read %}is-unread{% endif %}">
+        <div>
+          <div class="notification-title">
+            <span>{{ item.title }}</span>
+            <small>{{ item.get_event_type_display }}</small>
+          </div>
+          <p>{{ item.message }}</p>
+          <div class="notification-meta">
+            <span>{{ item.created_at|date:"d/m/Y H:i" }}</span>
+            <span>{{ item.get_priority_display }}</span>
+            <span>{{ item.get_channel_display }}</span>
+            {% if item.telegram_sent_at %}<span>Telegram đã gửi</span>{% elif item.telegram_error %}<span>{{ item.telegram_error }}</span>{% endif %}
+          </div>
+        </div>
+        <form method="post" action="{% url 'notification_mark_read' item.pk %}">
+          {% csrf_token %}
+          <button class="btn-mini">{% if item.url %}Mở{% else %}Đã đọc{% endif %}</button>
+        </form>
+      </article>
+    {% empty %}
+      <p class="empty">Chưa có thông báo</p>
+    {% endfor %}
+  </div>
+</section>
+{% include "partials/pagination.html" %}
+{% endblock %}

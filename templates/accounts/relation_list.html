@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block heading %}Gán staff cho manager{% endblock %}
+{% block content %}
+<div class="toolbar"><a class="btn" href="{% url 'relation_create' %}">Gán staff</a></div>
+<div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Manager</th><th>Staff</th><th>Ngày tạo</th></tr></thead>
+    <tbody>
+      {% for r in object_list %}
+        <tr><td><strong>{{ r.manager }}</strong></td><td>{{ r.staff }}</td><td>{{ r.created_at }}</td></tr>
+      {% empty %}
+        <tr><td colspan="3" class="empty">Chưa có phân công</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

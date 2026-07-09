@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block heading %}Gán staff{% endblock %}
+{% block content %}
+<form method="post" class="panel form-panel">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn">Lưu phân công</button>
+</form>
+{% endblock %}

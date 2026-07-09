@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block heading %}Dashboard{% endblock %}
+{% block content %}
+<div class="hero-panel">
+  <div>
+    <p class="eyebrow">Tổng quan vận hành</p>
+    <h2>Quản lý tiến độ, deadline và chất lượng công việc trong một màn hình.</h2>
+  </div>
+  <div class="hero-badges">
+    <span>Realtime</span>
+    <span>Phân quyền</span>
+    <span>Báo cáo</span>
+  </div>
+</div>
+
+<div class="stats-grid">
+  <div class="stat accent-blue"><span>Tổng dự án</span><strong>{{ projects_total }}</strong></div>
+  <div class="stat accent-violet"><span>Tổng công việc</span><strong>{{ tasks_total }}</strong></div>
+  <div class="stat accent-amber"><span>Chờ duyệt</span><strong>{{ tasks_waiting }}</strong></div>
+  <div class="stat accent-rose"><span>Quá hạn</span><strong>{{ tasks_overdue }}</strong></div>
+</div>
+
+<div class="dashboard-grid">
+  <section class="panel">
+    <h2 class="panel-title">Trạng thái dự án</h2>
+    <div class="status-list">
+      {% for item in projects_by_status %}
+        <div><span>{{ item.label }}</span><b>{{ item.total }}</b></div>
+      {% empty %}
+        <p class="empty">Chưa có dữ liệu</p>
+      {% endfor %}
+    </div>
+  </section>
+  <section class="panel">
+    <h2 class="panel-title">Hoạt động gần đây</h2>
+    <div class="activity-list">
+      {% for log in recent_logs %}
+        <div class="activity-row"><b>{{ log.actor|default:"Hệ thống" }}</b><span>{{ log.display_action }}</span><small>{{ log.created_at|date:"d/m/y H:i" }}</small></div>
+      {% empty %}
+        <p class="empty">Chưa có log</p>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

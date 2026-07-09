@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block heading %}Tài khoản{% endblock %}
+{% block content %}
+<form method="post" class="panel form-panel">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn">Lưu tài khoản</button>
+</form>
+{% endblock %}

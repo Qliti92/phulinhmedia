@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block heading %}{{ object.domain }}{% endblock %}
+{% block content %}
+<section class="panel">
+  <div class="detail-grid">
+    <div><span class="muted">Manager</span><b>{{ object.manager|default:"-" }}</b></div>
+    <div><span class="muted">Nhân viên</span><b>{{ object.staff|default:"-" }}</b></div>
+    <div><span class="muted">Trạng thái giao việc</span><b>{{ object.get_status_display }}</b></div>
+    <div><span class="muted">Trạng thái tiến trình</span><b>{{ object.get_progress_stage_display|default:"Chưa có" }}</b></div>
+    <div><span class="muted">Tiến độ</span><b>{{ object.progress }}%</b></div>
+    <div><span class="muted">Deadline</span><b>{{ object.deadline|default:"-" }}</b></div>
+  </div>
+  <div class="link-fields section-gap">
+    <p><span class="muted">Link camp</span>{% if object.campaign_link %}<a class="link" href="{{ object.campaign_link }}" target="_blank">{{ object.campaign_link }}</a>{% else %}<span>-</span>{% endif %}</p>
+    <p><span class="muted">Link đăng ký</span>{% if object.registration_link_1 %}<a class="link" href="{{ object.registration_link_1 }}" target="_blank">{{ object.registration_link_1 }}</a>{% else %}<span>-</span>{% endif %}</p>
+  </div>
+  <div class="actions-row"><a class="btn-muted" href="{% url 'project_update' object.pk %}">Sửa đầy đủ</a></div>
+</section>
+<section class="panel section-gap">
+  <h2 class="panel-title">Công việc thuộc dự án</h2>
+  <div class="activity-list">
+    {% for task in object.tasks.all %}
+      <div><b>{{ task.title }}</b><span>{{ task.get_status_display }}</span><small>{{ task.deadline|default:"Chưa có deadline" }}</small></div>
+    {% empty %}
+      <p class="empty">Chưa có công việc</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

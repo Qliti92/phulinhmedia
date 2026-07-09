@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Kết nối Telegram{% endblock %}
+{% block heading %}Kết nối Telegram{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid">
+  <section class="panel">
+    <h2 class="panel-title">Cài đặt của bạn</h2>
+    {% if bot_ready %}
+      <p class="muted">Bot Telegram đã được admin cấu hình. Bạn chỉ cần lưu Chat ID của mình.</p>
+    {% else %}
+      <p class="muted">Admin chưa cấu hình Bot Token. Bạn vẫn có thể lưu Chat ID, nhưng chưa gửi test được.</p>
+    {% endif %}
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <div class="actions-row">
+        <button class="btn" type="submit" name="action" value="save">Lưu Chat ID</button>
+        <button class="btn-muted" type="submit" name="action" value="fetch">Lấy Chat ID</button>
+        <button class="btn-muted" type="submit" name="action" value="test">Gửi test</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2 class="panel-title">Hướng dẫn kết nối</h2>
+    <div class="status-list">
+      <div><span>1. Mở Telegram trên điện thoại hoặc máy tính.</span><b>Telegram</b></div>
+      <div><span>2. Tìm bot công ty đã được admin tạo.</span><b>Bot</b></div>
+      <div><span>3. Nhấn Start hoặc gửi tin nhắn /start cho bot.</span><b>/start</b></div>
+      <div><span>4. Quay lại trang này, bấm Lấy Chat ID.</span><b>Chat ID</b></div>
+      <div><span>5. Chọn đúng tên của bạn rồi bấm Dùng ID này.</span><b>Lưu</b></div>
+      <div><span>6. Bấm Gửi test để kiểm tra bot gửi tin được chưa.</span><b>Test</b></div>
+    </div>
+  </section>
+</div>
+
+{% if telegram_chats %}
+  <section class="panel section-gap">
+    <h2 class="panel-title">Chat ID tìm thấy</h2>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Chat ID</th><th>Tên</th><th>Loại</th><th>Tin nhắn gần nhất</th><th></th></tr></thead>
+        <tbody>
+          {% for chat in telegram_chats %}
+            <tr>
+              <td><strong>{{ chat.id }}</strong></td>
+              <td>{{ chat.name }}{% if chat.username %} @{{ chat.username }}{% endif %}</td>
+              <td><span class="badge">{{ chat.type }}</span></td>
+              <td>{{ chat.text|default:"-" }}</td>
+              <td>
+                <form method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="select_chat">
+                  <input type="hidden" name="chat_id" value="{{ chat.id }}">
+                  <button class="btn-muted" type="submit">Dùng ID này</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endif %}
+{% endblock %}

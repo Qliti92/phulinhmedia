@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+{% block heading %}Quản lý dự án{% endblock %}
+{% block content %}
+<div class="project-summary-strip">
+  <div><span>Dự án hiển thị</span><strong>{{ object_list|length }}</strong></div>
+  {% if can_manage_projects %}<div><span>Giao việc nhanh</span><strong><span data-selected-count>0</span> đã chọn</strong></div>{% endif %}
+  <div><span>Tiến trình</span><strong>25 / 50 / 75 / 100</strong></div>
+</div>
+
+<div class="page-tools compact-tools">
+  <form class="filter-bar" method="get">
+    <input class="input" name="q" placeholder="Tìm domain" value="{{ request.GET.q }}">
+    <select class="input" name="status">
+      <option value="">Giao việc</option>
+      {% for value,label in statuses %}<option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <select class="input" name="progress_stage">
+      <option value="">Tiến trình</option>
+      {% for value,label in progress_stages %}<option value="{{ value }}" {% if request.GET.progress_stage == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    {% if staff_options %}
+      <select class="input" name="staff">
+        <option value="">Tất cả nhân viên</option>
+        {% for staff in staff_options %}
+          <option value="{{ staff.pk }}" {% if request.GET.staff == staff.pk|stringformat:"s" %}selected{% endif %}>{{ staff.full_name|default:staff.email }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+    <button class="btn">Lọc</button>
+  </form>
+  <div class="tool-actions">
+    {% if can_manage_projects %}<button class="btn-muted" type="button" data-open-bulk-modal>Giao việc hàng loạt</button>{% endif %}
+    {% if can_manage_projects %}<a class="btn-muted action-strong" href="{% url 'import_create' %}">Import dự án</a>{% endif %}
+    <a class="btn-muted" href="{% url 'export_projects' %}">Xuất dự án</a>
+    {% if can_manage_projects %}<a class="btn" href="{% url 'project_create' %}">Thêm dự án</a>{% endif %}
+  </div>
+</div>
+
+<div class="table-wrap project-table compact-project-table">
+  <table class="table">
+    <thead>
+      <tr>
+        {% if can_manage_projects %}<th class="col-check"><input type="checkbox" data-select-all-projects></th>{% endif %}
+        <th>STT</th>
+        <th>Dự án</th>
+        <th>Phụ trách</th>
+        <th>Trạng thái</th>
+        <th>Tiến độ</th>
+        <th>Liên kết</th>
+        <th>Deadline</th>
+        <th class="sticky-action"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in object_list %}
+        <tr>
+          {% if can_manage_projects %}<td class="col-check"><input type="checkbox" class="project-select" value="{{ p.pk }}"></td>{% endif %}
+          <td data-label="STT">{{ page_obj.start_index|add:forloop.counter0 }}</td>
+          <td class="project-cell" data-label="Dự án">
+            <span class="domain-text">{{ p.domain }}</span>
+            <span class="project-meta">Tạo {{ p.created_at|date:"d/m/Y" }}</span>
+          </td>
+          <td data-label="Phụ trách">
+            <div class="people-stack">
+              <span>{{ p.manager|default:"Chưa có manager" }}</span>
+              <small>{{ p.staff|default:"Chưa giao staff" }}</small>
+            </div>
+          </td>
+          <td data-label="Trạng thái">
+            <div class="status-stack">
+              <span class="badge badge-soft">{{ p.get_status_display }}</span>
+              {% if p.progress_stage %}<span class="stage-pill stage-{{ p.progress_stage }}">{{ p.get_progress_stage_display }}</span>{% else %}<span class="stage-pill stage-empty">Chưa có tiến trình</span>{% endif %}
+            </div>
+          </td>
+          <td data-label="Tiến độ">
+            <div class="progress-cell">
+              <span class="progress-percent">{{ p.progress }}%</span>
+              <div class="progress"><span style="width:{{ p.progress }}%"></span></div>
+            </div>
+          </td>
+          <td data-label="Liên kết">
+            <div class="links-compact">
+              {% if p.campaign_link %}<a href="{{ p.campaign_link }}" target="_blank">Camp</a>{% endif %}
+              {% if p.registration_link_1 %}<a href="{{ p.registration_link_1 }}" target="_blank">Đăng ký</a>{% endif %}
+            </div>
+          </td>
+          <td data-label="Deadline">
+            <div class="deadline-cell">
+              <span class="deadline-date">{{ p.deadline|date:"d/m/Y"|default:"Chưa đặt" }}</span>
+              <span class="deadline-state {{ p.deadline_state_class }}">{{ p.deadline_state_label }}</span>
+            </div>
+          </td>
+          <td class="sticky-action">
+            <div class="row-actions">
+              <button class="btn-mini" type="button" data-open-modal="project-modal-{{ p.pk }}">Cập nhật</button>
+              <a class="btn-mini btn-mini-ghost" href="{% url 'project_detail' p.pk %}">Chi tiết</a>
+            </div>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="{% if can_manage_projects %}9{% else %}8{% endif %}" class="empty">Chưa có dự án</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "partials/pagination.html" %}
+
+{% if can_manage_projects %}
+<div class="modal-backdrop" id="bulk-project-modal" aria-hidden="true">
+  <div class="modal-card modal-card-compact">
+    <div class="modal-head">
+      <div>
+        <p class="eyebrow">Giao việc nhanh</p>
+        <h2>Giao việc hàng loạt</h2>
+      </div>
+      <button class="icon-button" type="button" data-close-modal>×</button>
+    </div>
+    <form method="post" action="{% url 'project_bulk' %}" class="modal-form">
+      {% csrf_token %}
+      <input type="hidden" name="project_ids" data-bulk-project-ids>
+      <div class="bulk-selected-note"><span data-selected-count>0</span> dự án được chọn</div>
+      <div class="form-grid">
+        {% if request.user.is_admin_role %}
+        <p>
+          <label>Manager</label>
+          <select name="manager" data-manager-staff-filter>
+            <option value="">Giữ nguyên</option>
+            {% for manager in manager_options %}<option value="{{ manager.pk }}">{{ manager.full_name|default:manager.email }}</option>{% endfor %}
+          </select>
+        </p>
+        {% endif %}
+        <p>
+          <label>Staff phụ trách</label>
+          <select name="staff" data-staff-filter-target>
+            <option value="">Giữ nguyên</option>
+            {% for staff in staff_options %}<option value="{{ staff.pk }}" data-manager-id="{{ staff.manager_relation.manager_id }}">{{ staff.full_name|default:staff.email }}</option>{% endfor %}
+          </select>
+        </p>
+        <p>
+          <label>Trạng thái giao việc</label>
+          <select name="status">
+            <option value="">Giữ nguyên</option>
+            {% for value,label in statuses %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+          </select>
+        </p>
+        <p>
+          <label>Trạng thái tiến trình</label>
+          <select name="progress_stage">
+            <option value="">Giữ nguyên</option>
+            {% for value,label in progress_stages %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+          </select>
+        </p>
+        <p>
+          <label>Deadline</label>
+          <input type="date" name="deadline">
+        </p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-muted" type="button" data-close-modal>Hủy</button>
+        <button class="btn">Áp dụng</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+{% for p in object_list %}
+<div class="modal-backdrop" id="project-modal-{{ p.pk }}" aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <p class="eyebrow">Cập nhật dự án</p>
+        <h2>{{ p.domain }}</h2>
+      </div>
+      <button class="icon-button" type="button" data-close-modal>×</button>
+    </div>
+    <form method="post" action="{% url 'project_quick_update' p.pk %}" class="modal-form project-update-form">
+      {% csrf_token %}
+      <div class="form-grid">
+        {% if can_manage_projects %}
+        <p>
+          <label>Staff phụ trách</label>
+          <select name="staff">
+            <option value="">Chưa giao</option>
+            {% for staff in staff_options %}<option value="{{ staff.pk }}" {% if p.staff_id == staff.pk %}selected{% endif %}>{{ staff.full_name|default:staff.email }}</option>{% endfor %}
+          </select>
+        </p>
+        {% endif %}
+        <p>
+          <label>Trạng thái giao việc</label>
+          <select name="status">
+            {% for value,label in statuses %}<option value="{{ value }}" {% if p.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select>
+        </p>
+        <p>
+          <label>Trạng thái tiến trình</label>
+          <select name="progress_stage" data-progress-stage>
+            <option value="">Chưa có</option>
+            {% for value,label in progress_stages %}<option value="{{ value }}" {% if p.progress_stage == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select>
+        </p>
+        <p>
+          <label>Deadline</label>
+          <input type="date" name="deadline" value="{{ p.deadline|date:'Y-m-d' }}">
+        </p>
+      </div>
+      <div class="link-fields professional-link-fields" data-link-fields>
+        <div class="field-card">
+          <label>Link camp</label>
+          <input type="url" name="campaign_link" value="{{ p.campaign_link }}" placeholder="https://campaign.example.com">
+        </div>
+        <div class="field-card">
+          <label>Link đăng ký</label>
+          <input type="url" name="registration_link_1" value="{{ p.registration_link_1 }}" placeholder="https://register.example.com">
+        </div>
+      </div>
+      <p><label>Ghi chú</label><textarea name="note" rows="3">{{ p.note }}</textarea></p>
+      <div class="modal-actions">
+        <button class="btn-muted" type="button" data-close-modal>Hủy</button>
+        <button class="btn">Lưu cập nhật</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block heading %}{{ object.title }}{% endblock %}
+{% block content %}
+<section class="panel">
+  <div class="detail-grid">
+    <div><span class="muted">Người nhận</span><b>{{ object.assignee|default:"-" }}</b></div>
+    <div><span class="muted">Trạng thái</span><b>{{ object.get_status_display }}</b></div>
+    <div><span class="muted">Tiến độ</span><b>{{ object.progress }}%</b></div>
+    <div><span class="muted">Deadline</span><b>{{ object.deadline|default:"-" }}</b></div>
+    <div><span class="muted">Người tạo</span><b>{{ object.created_by|default:"-" }}</b></div>
+  </div>
+  <p class="description">{{ object.description }}</p>
+  <div class="actions-row">
+    <a class="btn-muted" href="{% url 'task_staff_update' object.pk %}">Cập nhật</a>
+    <a class="btn-muted" href="{% url 'task_review' object.pk %}">Duyệt</a>
+  </div>
+</section>
+<section class="panel section-gap">
+  <h2 class="panel-title">File minh chứng</h2>
+  <div class="file-list">
+    {% for file in object.attachments.all %}
+      <a class="link" href="{{ file.file.url }}">{{ file.file.name }}</a>
+    {% empty %}
+      <p class="empty">Chưa có file</p>
+    {% endfor %}
+  </div>
+  <form method="post" enctype="multipart/form-data" class="upload-form">
+    {% csrf_token %}
+    {{ attachment_form.as_p }}
+    <button class="btn">Tải lên</button>
+  </form>
+</section>
+{% endblock %}
