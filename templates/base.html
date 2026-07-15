@@ -23,7 +23,6 @@
         <a class="nav-link" href="{% url 'dashboard' %}"><span>DB</span>Dashboard</a>
         <a class="nav-link" href="{% url 'projects' %}"><span>DA</span>Dự án</a>
         <a class="nav-link" href="{% url 'tasks' %}"><span>CV</span>Công việc</a>
-        <a class="nav-link" href="{% url 'attendance' %}"><span>CC</span>Chấm công</a>
         <a class="nav-link" href="{% url 'reports' %}"><span>BC</span>Báo cáo</a>
         {% if not request.user.is_admin_role %}
           <a class="nav-link" href="{% url 'telegram_connection' %}"><span>TG</span>Telegram</a>

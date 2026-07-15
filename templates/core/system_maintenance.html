@@ -51,7 +51,7 @@
     <form method="post" action="{% url 'system_maintenance_action' %}">
       {% csrf_token %}
       <input type="hidden" name="action" value="create_backup">
-      <p class="muted">Backup lưu toàn bộ dữ liệu hệ thống, bao gồm tài khoản, cấu hình, dự án, công việc, chấm công, import, thông báo và log.</p>
+      <p class="muted">Backup lưu toàn bộ dữ liệu hệ thống, bao gồm tài khoản, cấu hình, dự án, công việc, import, thông báo và log.</p>
       <button class="btn" type="submit">Tạo backup ngay</button>
     </form>
     <form class="section-gap" method="post" action="{% url 'system_maintenance_action' %}" enctype="multipart/form-data">

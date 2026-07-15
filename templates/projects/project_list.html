@@ -43,10 +43,10 @@
         {% if can_manage_projects %}<th class="col-check"><input type="checkbox" data-select-all-projects></th>{% endif %}
         <th>STT</th>
         <th>Dự án</th>
+        <th>Liên kết</th>
         <th>Phụ trách</th>
         <th>Trạng thái</th>
         <th>Tiến độ</th>
-        <th>Liên kết</th>
         <th>Deadline</th>
         <th class="sticky-action"></th>
       </tr>
@@ -59,6 +59,12 @@
           <td class="project-cell" data-label="Dự án">
             <span class="domain-text">{{ p.domain }}</span>
             <span class="project-meta">Tạo {{ p.created_at|date:"d/m/Y" }}</span>
+          </td>
+          <td data-label="Liên kết">
+            <div class="links-compact">
+              {% if p.campaign_link %}<a href="{{ p.campaign_link }}" target="_blank">Camp</a>{% endif %}
+              {% if p.registration_link_1 %}<a href="{{ p.registration_link_1 }}" target="_blank">Đăng ký</a>{% endif %}
+            </div>
           </td>
           <td data-label="Phụ trách">
             <div class="people-stack">
@@ -76,12 +82,6 @@
             <div class="progress-cell">
               <span class="progress-percent">{{ p.progress }}%</span>
               <div class="progress"><span style="width:{{ p.progress }}%"></span></div>
-            </div>
-          </td>
-          <td data-label="Liên kết">
-            <div class="links-compact">
-              {% if p.campaign_link %}<a href="{{ p.campaign_link }}" target="_blank">Camp</a>{% endif %}
-              {% if p.registration_link_1 %}<a href="{{ p.registration_link_1 }}" target="_blank">Đăng ký</a>{% endif %}
             </div>
           </td>
           <td data-label="Deadline">

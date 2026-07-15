@@ -53,16 +53,6 @@
     </div>
   </section>
 
-  <section class="panel">
-    <h2 class="panel-title">Chấm công trong kỳ</h2>
-    <div class="status-list">
-      {% for item in attendance_summary %}
-        <div><span>{{ item.label }}</span><b>{{ item.total }}</b></div>
-      {% empty %}
-        <p class="empty">Chưa có dữ liệu chấm công.</p>
-      {% endfor %}
-    </div>
-  </section>
 </div>
 
 <section class="panel section-gap">

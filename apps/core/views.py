@@ -30,13 +30,16 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         tasks = Task.objects.visible_to(user)
         status_counts = projects.values("status").annotate(total=Count("id"))
         status_labels = dict(Project.Status.choices)
+        recent_logs = ActivityLog.objects.select_related("actor")
+        if not user.is_admin_role:
+            recent_logs = recent_logs.filter(actor=user)
         ctx.update({
             "projects_total": projects.count(),
             "tasks_total": tasks.count(),
             "projects_by_status": [{"label": status_labels.get(item["status"], item["status"]), "total": item["total"]} for item in status_counts],
             "tasks_waiting": tasks.filter(status=Task.Status.BLOCKED).count(),
             "tasks_overdue": tasks.filter(deadline__lt=today).exclude(status=Task.Status.DONE).count(),
-            "recent_logs": ActivityLog.objects.select_related("actor")[:12],
+            "recent_logs": recent_logs[:12],
         })
         if user.is_admin_role:
             ctx["top_staff"] = StaffPerformance.objects.select_related("staff").order_by("-score")[:5]

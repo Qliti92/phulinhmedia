@@ -7,8 +7,8 @@ from django.views.generic import CreateView, DetailView, ListView, UpdateView, V
 
 from apps.accounts.models import ManagerStaffRelation, User
 from apps.core.services import notify_task_assigned, notify_task_reviewed, notify_task_updated
-from .forms import AttendanceForm, BulkTaskAssignForm, ReviewTaskForm, StaffTaskUpdateForm, TaskAttachmentForm, TaskForm, TaskQuickUpdateForm
-from .models import Attendance, Task
+from .forms import BulkTaskAssignForm, ReviewTaskForm, StaffTaskUpdateForm, TaskAttachmentForm, TaskForm, TaskQuickUpdateForm
+from .models import Task
 
 
 class TaskAccessMixin(LoginRequiredMixin):
@@ -171,73 +171,3 @@ class TaskDetailView(TaskAccessMixin, DetailView):
             attachment.save()
             messages.success(request, "Đã tải file minh chứng.")
         return redirect("task_detail", pk=self.object.pk)
-
-
-class AttendanceListView(LoginRequiredMixin, ListView):
-    model = Attendance
-    template_name = "tasks/attendance_list.html"
-    paginate_by = 31
-
-    def get_queryset(self):
-        qs = Attendance.objects.select_related("staff", "created_by")
-        user = self.request.user
-        if user.is_staff_role:
-            qs = qs.filter(staff=user)
-        elif user.is_manager_role:
-            from apps.accounts.models import ManagerStaffRelation
-
-            staff_ids = ManagerStaffRelation.objects.filter(manager=user).values_list("staff_id", flat=True)
-            qs = qs.filter(staff_id__in=staff_ids)
-        month = self.request.GET.get("month")
-        if month:
-            try:
-                year, month_number = [int(part) for part in month.split("-")]
-                qs = qs.filter(date__year=year, date__month=month_number)
-            except ValueError:
-                pass
-        else:
-            today = timezone.localdate()
-            qs = qs.filter(date__year=today.year, date__month=today.month)
-        staff_id = self.request.GET.get("staff")
-        if staff_id and (user.is_admin_role or user.is_manager_role):
-            qs = qs.filter(staff_id=staff_id)
-        return qs
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        user = self.request.user
-        ctx["month_value"] = self.request.GET.get("month") or timezone.localdate().strftime("%Y-%m")
-        ctx["can_manage_attendance"] = user.is_admin_role or user.is_manager_role
-        ctx["attendance_form"] = AttendanceForm(user=user)
-        if user.is_admin_role:
-            from apps.accounts.models import User
-
-            ctx["staff_options"] = User.objects.filter(role=User.Role.STAFF, is_active=True)
-        elif user.is_manager_role:
-            from apps.accounts.models import ManagerStaffRelation, User
-
-            staff_ids = ManagerStaffRelation.objects.filter(manager=user).values_list("staff_id", flat=True)
-            ctx["staff_options"] = User.objects.filter(pk__in=staff_ids, is_active=True)
-        return ctx
-
-
-class AttendanceCreateView(LoginRequiredMixin, CanAssignTaskMixin, View):
-    def post(self, request):
-        form = AttendanceForm(request.POST, user=request.user)
-        if form.is_valid():
-            item = form.save(commit=False)
-            Attendance.objects.update_or_create(
-                staff=item.staff,
-                date=item.date,
-                defaults={
-                    "check_in": item.check_in,
-                    "check_out": item.check_out,
-                    "status": item.status,
-                    "note": item.note,
-                    "created_by": request.user,
-                },
-            )
-            messages.success(request, "Đã lưu chấm công.")
-        else:
-            messages.error(request, "Không lưu được chấm công. Vui lòng kiểm tra lại.")
-        return redirect("attendance")

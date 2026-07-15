@@ -10,7 +10,7 @@ from django.views.generic import TemplateView
 from apps.core.models import ActivityLog
 from apps.core.models import SystemSetting
 from apps.projects.models import Project
-from apps.tasks.models import Attendance, StaffPerformance, Task
+from apps.tasks.models import StaffPerformance, Task
 
 
 def refresh_staff_performance():
@@ -67,23 +67,10 @@ class ReportDashboardView(LoginRequiredMixin, TemplateView):
         ranking = StaffPerformance.objects.select_related("staff").order_by("-score", "-completion_rate")
         if user.is_staff_role:
             ranking = ranking.filter(staff=user)
-        attendance = Attendance.objects.filter(date__gte=start, date__lte=end)
-        if user.is_staff_role:
-            attendance = attendance.filter(staff=user)
-        elif user.is_manager_role:
-            from apps.accounts.models import ManagerStaffRelation
-
-            staff_ids = ManagerStaffRelation.objects.filter(manager=user).values_list("staff_id", flat=True)
-            attendance = attendance.filter(staff_id__in=staff_ids)
         task_status_labels = dict(Task.Status.choices)
-        attendance_status_labels = dict(Attendance.Status.choices)
         tasks_by_status = [
             {"label": task_status_labels.get(item["status"], item["status"]), "total": item["total"]}
             for item in tasks.values("status").annotate(total=Count("id"))
-        ]
-        attendance_summary = [
-            {"label": attendance_status_labels.get(item["status"], item["status"]), "total": item["total"]}
-            for item in attendance.values("status").annotate(total=Count("id"))
         ]
         ctx.update({
             "period": period,
@@ -98,7 +85,6 @@ class ReportDashboardView(LoginRequiredMixin, TemplateView):
             "tasks_overdue": tasks.filter(deadline__lt=timezone.localdate()).exclude(status=Task.Status.DONE).count(),
             "period_tasks": period_tasks.count(),
             "tasks_by_status": tasks_by_status,
-            "attendance_summary": attendance_summary,
             "ranking": ranking[:20] if can_view_ranking else [],
             "can_view_ranking": can_view_ranking,
             "ranking_visible_to_staff": ranking_visible,

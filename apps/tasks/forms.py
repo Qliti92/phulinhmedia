@@ -1,7 +1,7 @@
 from django import forms
 
 from apps.accounts.models import ManagerStaffRelation, User
-from .models import Attendance, Task, TaskAttachment
+from .models import Task, TaskAttachment
 
 
 class TaskForm(forms.ModelForm):
@@ -55,24 +55,3 @@ class TaskAttachmentForm(forms.ModelForm):
     class Meta:
         model = TaskAttachment
         fields = ["file", "note"]
-
-
-class AttendanceForm(forms.ModelForm):
-    class Meta:
-        model = Attendance
-        fields = ["staff", "date", "check_in", "check_out", "status", "note"]
-        widgets = {
-            "date": forms.DateInput(attrs={"type": "date"}),
-            "check_in": forms.TimeInput(attrs={"type": "time"}),
-            "check_out": forms.TimeInput(attrs={"type": "time"}),
-        }
-
-    def __init__(self, *args, user=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        if user and user.is_manager_role:
-            staff_ids = ManagerStaffRelation.objects.filter(manager=user).values_list("staff_id", flat=True)
-            self.fields["staff"].queryset = User.objects.filter(pk__in=staff_ids, is_active=True)
-        elif user and user.is_admin_role:
-            self.fields["staff"].queryset = User.objects.filter(role=User.Role.STAFF, is_active=True)
-        else:
-            self.fields["staff"].queryset = User.objects.none()
