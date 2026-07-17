@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView, UpdateView, View
@@ -156,4 +157,18 @@ class ProjectQuickUpdateView(LoginRequiredMixin, View):
             messages.success(request, "Đã cập nhật dự án.")
         else:
             messages.error(request, "Không thể cập nhật dự án. Vui lòng kiểm tra lại dữ liệu.")
+        return redirect("projects")
+
+
+class ProjectDeleteView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        project = get_object_or_404(Project, pk=pk)
+        can_delete = request.user.is_admin_role or (
+            request.user.is_manager_role and project.created_by_id == request.user.id
+        )
+        if not can_delete:
+            raise PermissionDenied
+
+        project.delete()
+        messages.success(request, "Đã xóa dự án.")
         return redirect("projects")

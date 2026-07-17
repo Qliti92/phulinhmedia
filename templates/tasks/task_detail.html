@@ -13,6 +13,12 @@
   <div class="actions-row">
     <a class="btn-muted" href="{% url 'task_staff_update' object.pk %}">Cập nhật</a>
     <a class="btn-muted" href="{% url 'task_review' object.pk %}">Duyệt</a>
+    {% if request.user.is_admin_role %}
+      <form method="post" action="{% url 'task_delete' object.pk %}" onsubmit="return confirm('Bạn chắc chắn muốn xóa công việc này?');">
+        {% csrf_token %}
+        <button class="btn-danger" type="submit">Xóa công việc</button>
+      </form>
+    {% endif %}
   </div>
 </section>
 <section class="panel section-gap">

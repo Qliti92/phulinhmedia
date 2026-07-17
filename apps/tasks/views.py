@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -13,7 +14,7 @@ from .models import Task
 
 class TaskAccessMixin(LoginRequiredMixin):
     def get_queryset(self):
-        return Task.objects.select_related("assignee", "created_by").visible_to(self.request.user)
+        return Task.objects.select_related("project", "assignee", "created_by").visible_to(self.request.user)
 
 
 class CanAssignTaskMixin(UserPassesTestMixin):
@@ -171,3 +172,14 @@ class TaskDetailView(TaskAccessMixin, DetailView):
             attachment.save()
             messages.success(request, "Đã tải file minh chứng.")
         return redirect("task_detail", pk=self.object.pk)
+
+
+class TaskDeleteView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        if not request.user.is_admin_role:
+            raise PermissionDenied
+
+        task = get_object_or_404(Task, pk=pk)
+        task.delete()
+        messages.success(request, "Đã xóa công việc.")
+        return redirect("tasks")

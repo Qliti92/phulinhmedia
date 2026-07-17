@@ -14,7 +14,15 @@
     <p><span class="muted">Link camp</span>{% if object.campaign_link %}<a class="link" href="{{ object.campaign_link }}" target="_blank">{{ object.campaign_link }}</a>{% else %}<span>-</span>{% endif %}</p>
     <p><span class="muted">Link đăng ký</span>{% if object.registration_link_1 %}<a class="link" href="{{ object.registration_link_1 }}" target="_blank">{{ object.registration_link_1 }}</a>{% else %}<span>-</span>{% endif %}</p>
   </div>
-  <div class="actions-row"><a class="btn-muted" href="{% url 'project_update' object.pk %}">Sửa đầy đủ</a></div>
+  <div class="actions-row">
+    <a class="btn-muted" href="{% url 'project_update' object.pk %}">Sửa đầy đủ</a>
+    {% if request.user.is_admin_role or request.user.is_manager_role and object.created_by_id == request.user.id %}
+      <form method="post" action="{% url 'project_delete' object.pk %}" onsubmit="return confirm('Bạn chắc chắn muốn xóa dự án này?');">
+        {% csrf_token %}
+        <button class="btn-danger" type="submit">Xóa dự án</button>
+      </form>
+    {% endif %}
+  </div>
 </section>
 <section class="panel section-gap">
   <h2 class="panel-title">Công việc thuộc dự án</h2>

@@ -11,4 +11,5 @@ urlpatterns = [
     path("<int:pk>/sua/", views.TaskUpdateView.as_view(), name="task_update"),
     path("<int:pk>/cap-nhat/", views.StaffTaskUpdateView.as_view(), name="task_staff_update"),
     path("<int:pk>/duyet/", views.TaskReviewView.as_view(), name="task_review"),
+    path("<int:pk>/xoa/", views.TaskDeleteView.as_view(), name="task_delete"),
 ]

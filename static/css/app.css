@@ -71,10 +71,12 @@ button,input,select,textarea{font:inherit;min-width:0}
 .tool-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .toolbar form{display:flex;gap:10px;flex-wrap:wrap;align-items:center;min-width:0}
 .toolbar .input,.toolbar select{width:auto;min-width:190px}
-.btn,.btn-muted{display:inline-flex;align-items:center;justify-content:center;border-radius:14px;padding:11px 16px;font-weight:650;font-size:.9rem;border:0;cursor:pointer;transition:.18s ease;white-space:nowrap}
+.btn,.btn-muted,.btn-danger{display:inline-flex;align-items:center;justify-content:center;border-radius:14px;padding:11px 16px;font-weight:650;font-size:.9rem;border:0;cursor:pointer;transition:.18s ease;white-space:nowrap}
 .btn{background:linear-gradient(135deg,#2563eb,#7c3aed);color:white;box-shadow:0 12px 26px rgba(79,70,229,.24)}
-.btn:hover,.btn-muted:hover{transform:translateY(-1px)}
+.btn:hover,.btn-muted:hover,.btn-danger:hover{transform:translateY(-1px)}
 .btn-muted{border:1px solid var(--line);background:white;color:#334155}
+.btn-danger{border:1px solid #fecaca;background:#dc2626;color:white;box-shadow:0 8px 18px rgba(220,38,38,.18)}
+.btn-danger:hover{background:#b91c1c}
 .action-strong{border-color:#bfdbfe;background:#eff6ff;color:#1d4ed8}
 .btn-full{width:100%;margin-top:10px}
 .input,select,textarea,input[type=text],input[type=email],input[type=password],input[type=number],input[type=date],input[type=file]{width:100%;border:1px solid #d8deea;border-radius:14px;padding:12px 13px;background:#fbfdff;color:var(--ink);outline:none}
@@ -83,14 +85,18 @@ button,input,select,textarea{font:inherit;min-width:0}
 form p{margin:0 0 14px}
 .table-wrap{width:100%;overflow:auto;background:white;border:1px solid rgba(255,255,255,.92);border-radius:20px;box-shadow:0 18px 44px rgba(23,32,51,.07)}
 .table{min-width:1120px;width:100%;border-collapse:separate;border-spacing:0;font-size:.9rem}
-.table th{position:sticky;top:0;background:#f6f8fc;text-align:left;color:#46556c;font-weight:650}
+.table th{position:sticky;top:0;background:#f1f5f9;text-align:left;color:#475569;font-weight:700;z-index:1}
 .table th,.table td{padding:15px 14px;border-bottom:1px solid #eef2f7;vertical-align:middle}
-.table tbody tr:hover{background:#fbfdff}
+.table tbody tr:nth-child(even){background:#fbfdff}
+.table tbody tr:hover{background:#eff6ff}
 .table strong,.activity-list b{font-weight:600}
 .domain-text{font-weight:620;color:#0f172a}
-.row-actions{display:grid;gap:5px;align-items:center;white-space:nowrap;justify-items:end}
-.btn-mini{border:1px solid #dbeafe;background:#eff6ff;color:#1d4ed8;border-radius:999px;padding:4px 8px;font-size:.7rem;font-weight:600;cursor:pointer;line-height:1.25}
+.row-actions{display:flex;gap:6px;align-items:center;white-space:nowrap;justify-content:flex-end}
+.row-actions form{display:inline-flex;margin:0}
+.btn-mini{border:1px solid #dbeafe;background:#eff6ff;color:#1d4ed8;border-radius:9px;padding:6px 9px;font-size:.7rem;font-weight:650;cursor:pointer;line-height:1.25}
 .btn-mini-ghost{background:white;color:#475569;border-color:#e5e7eb}
+.btn-mini-danger{background:#fee2e2;color:#b91c1c;border-color:#fecaca}
+.btn-mini-danger:hover{background:#dc2626;color:white;border-color:#dc2626}
 .link-chip{display:inline-flex;border:1px solid #bfdbfe;background:#eff6ff;color:#1d4ed8;border-radius:999px;padding:5px 9px;font-size:.78rem;font-weight:620}
 .link-stack{display:flex;gap:6px;flex-wrap:wrap;min-width:120px}
 .link-stack a{color:#2563eb;font-weight:600;font-size:.82rem}
@@ -101,9 +107,9 @@ form p{margin:0 0 14px}
 .compact-tools{align-items:flex-start}
 .compact-tools .input{padding:9px 11px;border-radius:12px;font-size:.84rem}
 .compact-tools .btn,.compact-tools .btn-muted{padding:9px 12px;border-radius:12px;font-size:.84rem}
-.compact-project-table .table{min-width:1020px;font-size:.8rem}
+.compact-project-table .table{min-width:1040px;font-size:.82rem}
 .compact-project-table .table th{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:#64748b}
-.compact-project-table .table th,.compact-project-table .table td{padding:10px 12px}
+.compact-project-table .table th,.compact-project-table .table td{padding:12px}
 .compact-project-table .col-check{width:42px;text-align:center}
 .compact-project-table input[type=checkbox]{width:15px;height:15px;accent-color:#2563eb}
 .compact-project-table .project-cell{min-width:210px}
@@ -127,7 +133,9 @@ form p{margin:0 0 14px}
 .deadline-warning{color:#d97706}
 .deadline-overdue{color:#dc2626;font-weight:620}
 .deadline-done{color:#2563eb}
-.sticky-action{position:sticky;right:0;background:inherit;box-shadow:-8px 0 14px rgba(255,255,255,.72)}
+.sticky-action{position:sticky;right:0;background:#fff;box-shadow:-10px 0 18px rgba(15,23,42,.05);min-width:210px}
+.table tbody tr:nth-child(even) .sticky-action{background:#fbfdff}
+.table tbody tr:hover .sticky-action{background:#eff6ff}
 .stage-empty{background:#f1f5f9;color:#64748b}
 .badge{display:inline-flex;align-items:center;border-radius:999px;background:#e0f2fe;color:#075985;padding:4px 8px;font-weight:600;font-size:.68rem;white-space:nowrap;line-height:1.25}
 .badge-soft{background:#eef2ff;color:#3730a3}
@@ -175,7 +183,10 @@ form p{margin:0 0 14px}
 .link-fields[hidden]{display:none}
 .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
 .bulk-selected-note{display:inline-flex;align-items:center;border:1px solid #dbeafe;background:#eff6ff;color:#1d4ed8;border-radius:999px;padding:7px 10px;font-size:.8rem;font-weight:620;margin-bottom:14px}
-.task-table .table{min-width:820px}
+.task-table .table{min-width:980px}
+.task-title-cell{display:grid;gap:5px;min-width:190px}
+.task-title-cell small,.table-muted{color:#94a3b8;font-size:.72rem}
+.project-reference{display:inline-block;max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1d4ed8;background:#eff6ff;border:1px solid #dbeafe;border-radius:8px;padding:5px 8px;font-size:.74rem;font-weight:650}
 .modal-form select[multiple]{min-height:148px}
 .task-note-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
 .notification-list{display:grid;gap:10px}
@@ -244,7 +255,7 @@ form p{margin:0 0 14px}
   .progress{width:82px}
   .panel{padding:14px;border-radius:14px}
   .detail-grid,.mini-stats{grid-template-columns:1fr}
-  .actions-row .btn,.actions-row .btn-muted,.actions-row form{width:100%}
+  .actions-row .btn,.actions-row .btn-muted,.actions-row .btn-danger,.actions-row form{width:100%}
   .login-body{padding:12px}
   .login-hero,.login-card{border-radius:18px;padding:22px}
   .login-hero{min-height:230px}

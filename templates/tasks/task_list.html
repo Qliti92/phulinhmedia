@@ -31,6 +31,7 @@
       <tr>
         <th>STT</th>
         <th>Công việc</th>
+        <th>Dự án</th>
         <th>Người nhận</th>
         <th>Trạng thái</th>
         <th>Tiến độ</th>
@@ -43,7 +44,17 @@
         <tr>
           <td data-label="STT">{{ page_obj.start_index|add:forloop.counter0 }}</td>
           <td data-label="Công việc">
-            <span class="domain-text">{{ t.title }}</span>
+            <div class="task-title-cell">
+              <span class="domain-text">{{ t.title }}</span>
+              <small>Người giao: {{ t.created_by|default:"-" }}</small>
+            </div>
+          </td>
+          <td data-label="Dự án">
+            {% if t.project %}
+              <a class="project-reference" href="{% url 'project_detail' t.project.pk %}">{{ t.project.domain }}</a>
+            {% else %}
+              <span class="table-muted">Không thuộc dự án</span>
+            {% endif %}
           </td>
           <td data-label="Người nhận">{{ t.assignee|default:"-" }}</td>
           <td data-label="Trạng thái"><span class="badge badge-soft">{{ t.get_status_display }}</span></td>
@@ -63,11 +74,17 @@
             <div class="row-actions">
               <button class="btn-mini" type="button" data-open-modal="task-modal-{{ t.pk }}">Cập nhật</button>
               <a class="btn-mini btn-mini-ghost" href="{% url 'task_detail' t.pk %}">Chi tiết</a>
+              {% if request.user.is_admin_role %}
+                <form method="post" action="{% url 'task_delete' t.pk %}" onsubmit="return confirm('Bạn chắc chắn muốn xóa công việc này?');">
+                  {% csrf_token %}
+                  <button class="btn-mini btn-mini-danger" type="submit">Xóa</button>
+                </form>
+              {% endif %}
             </div>
           </td>
         </tr>
       {% empty %}
-        <tr><td colspan="7" class="empty">Chưa có công việc</td></tr>
+        <tr><td colspan="8" class="empty">Chưa có công việc</td></tr>
       {% endfor %}
     </tbody>
   </table>
