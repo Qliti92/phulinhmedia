@@ -95,8 +95,8 @@ form p{margin:0 0 14px}
 .row-actions form{display:inline-flex;margin:0}
 .btn-mini{border:1px solid #dbeafe;background:#eff6ff;color:#1d4ed8;border-radius:9px;padding:6px 9px;font-size:.7rem;font-weight:650;cursor:pointer;line-height:1.25}
 .btn-mini-ghost{background:white;color:#475569;border-color:#e5e7eb}
-.btn-mini-danger{background:#fee2e2;color:#b91c1c;border-color:#fecaca}
-.btn-mini-danger:hover{background:#dc2626;color:white;border-color:#dc2626}
+.btn-mini-danger{background:#dc2626;color:#fff;border-color:#dc2626;box-shadow:0 5px 12px rgba(220,38,38,.22)}
+.btn-mini-danger:hover{background:#991b1b;color:#fff;border-color:#991b1b}
 .link-chip{display:inline-flex;border:1px solid #bfdbfe;background:#eff6ff;color:#1d4ed8;border-radius:999px;padding:5px 9px;font-size:.78rem;font-weight:620}
 .link-stack{display:flex;gap:6px;flex-wrap:wrap;min-width:120px}
 .link-stack a{color:#2563eb;font-weight:600;font-size:.82rem}
