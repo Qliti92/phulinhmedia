@@ -14,8 +14,11 @@ class ProjectQuerySet(models.QuerySet):
             return self.filter(manager=user)
         return self.filter(staff=user)
 
-
 class Project(models.Model):
+    class FinancialResult(models.TextChoices):
+        PROFIT = "profit", "Lãi"
+        LOSS = "loss", "Lỗ"
+
     class Status(models.TextChoices):
         UNASSIGNED = "unassigned", "Chưa giao"
         ASSIGNED = "assigned", "Đã giao"
@@ -42,11 +45,14 @@ class Project(models.Model):
     progress_stage = models.CharField("Trạng thái tiến trình", max_length=30, choices=ProgressStage.choices, blank=True)
     progress = models.PositiveSmallIntegerField("Tiến độ (%)", default=0)
     campaign_link = models.URLField("Link camp", blank=True)
-    registration_link_1 = models.URLField("Link đăng ký", blank=True)
+    registration_link_1 = models.URLField("Link đăng nhập", blank=True)
     registration_link_2 = models.URLField("Link đăng ký 2", blank=True)
     registration_link_3 = models.URLField("Link đăng ký 3", blank=True)
     deadline = models.DateField("Deadline", null=True, blank=True)
     note = models.TextField("Ghi chú", blank=True)
+    financial_result = models.CharField(
+        "Kết quả lãi/lỗ", max_length=10, choices=FinancialResult.choices, blank=True
+    )
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="created_projects", verbose_name="Người tạo")
     created_at = models.DateTimeField("Ngày tạo", auto_now_add=True)
     updated_at = models.DateTimeField("Cập nhật", auto_now=True)

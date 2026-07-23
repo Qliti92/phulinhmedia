@@ -76,7 +76,7 @@ class ProjectCreateView(ProjectAccessMixin, CanManageProjectMixin, CreateView):
         return response
 
 
-class ProjectUpdateView(ProjectAccessMixin, CanManageProjectMixin, UpdateView):
+class ProjectUpdateView(ProjectAccessMixin, UpdateView):
     form_class = ProjectForm
     template_name = "projects/project_form.html"
     success_url = reverse_lazy("projects")
@@ -171,4 +171,24 @@ class ProjectDeleteView(LoginRequiredMixin, View):
 
         project.delete()
         messages.success(request, "Đã xóa dự án.")
+        return redirect("projects")
+
+
+class BulkProjectDeleteView(LoginRequiredMixin, View):
+    def post(self, request):
+        raw_ids = request.POST.getlist("project_ids")
+        if len(raw_ids) == 1:
+            raw_ids = raw_ids[0].split(",")
+        ids = [int(pk) for pk in raw_ids if pk.strip().isdigit()]
+        projects = Project.objects.visible_to(request.user).filter(pk__in=ids)
+        if request.user.is_manager_role:
+            projects = projects.filter(created_by=request.user)
+        elif not request.user.is_admin_role:
+            raise PermissionDenied
+        count = projects.count()
+        projects.delete()
+        if count:
+            messages.success(request, f"Đã xóa {count} dự án.")
+        else:
+            messages.error(request, "Không có dự án hợp lệ được chọn để xóa.")
         return redirect("projects")

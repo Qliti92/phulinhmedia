@@ -30,6 +30,12 @@
   </form>
   <div class="tool-actions">
     {% if can_manage_projects %}<button class="btn-muted" type="button" data-open-bulk-modal>Giao việc hàng loạt</button>{% endif %}
+    {% if request.user.is_admin_role or request.user.is_manager_role %}
+      <form method="post" action="{% url 'project_bulk_delete' %}" data-bulk-delete-form="project" onsubmit="return confirm('Bạn chắc chắn muốn xóa các dự án đã chọn?');">
+        {% csrf_token %}<input type="hidden" name="project_ids" data-bulk-delete-ids="project">
+        <button class="btn-danger" type="submit">Xóa đã chọn</button>
+      </form>
+    {% endif %}
     {% if can_manage_projects %}<a class="btn-muted action-strong" href="{% url 'import_create' %}">Import dự án</a>{% endif %}
     <a class="btn-muted" href="{% url 'export_projects' %}">Xuất dự án</a>
     {% if can_manage_projects %}<a class="btn" href="{% url 'project_create' %}">Thêm dự án</a>{% endif %}
@@ -47,6 +53,7 @@
         <th>Phụ trách</th>
         <th>Trạng thái</th>
         <th>Tiến độ</th>
+        <th>Lãi/lỗ</th>
         <th>Deadline</th>
         <th class="sticky-action"></th>
       </tr>
@@ -63,7 +70,7 @@
           <td data-label="Liên kết">
             <div class="links-compact">
               {% if p.campaign_link %}<a href="{{ p.campaign_link }}" target="_blank">Camp</a>{% endif %}
-              {% if p.registration_link_1 %}<a href="{{ p.registration_link_1 }}" target="_blank">Đăng ký</a>{% endif %}
+              {% if p.registration_link_1 %}<a href="{{ p.registration_link_1 }}" target="_blank">Đăng nhập</a>{% endif %}
             </div>
           </td>
           <td data-label="Phụ trách">
@@ -84,6 +91,7 @@
               <div class="progress"><span style="width:{{ p.progress }}%"></span></div>
             </div>
           </td>
+          <td data-label="Lãi/lỗ"><strong>{{ p.get_financial_result_display|default:"Chưa chọn" }}</strong></td>
           <td data-label="Deadline">
             <div class="deadline-cell">
               <span class="deadline-date">{{ p.deadline|date:"d/m/Y"|default:"Chưa đặt" }}</span>
@@ -104,7 +112,7 @@
           </td>
         </tr>
       {% empty %}
-        <tr><td colspan="{% if can_manage_projects %}9{% else %}8{% endif %}" class="empty">Chưa có dự án</td></tr>
+        <tr><td colspan="{% if can_manage_projects %}10{% else %}9{% endif %}" class="empty">Chưa có dự án</td></tr>
       {% endfor %}
     </tbody>
   </table>
@@ -209,6 +217,14 @@
           <label>Deadline</label>
           <input type="date" name="deadline" value="{{ p.deadline|date:'Y-m-d' }}">
         </p>
+        <p>
+          <label>Kết quả lãi/lỗ</label>
+          <select name="financial_result">
+            <option value="">Chưa chọn</option>
+            <option value="profit" {% if p.financial_result == "profit" %}selected{% endif %}>Lãi</option>
+            <option value="loss" {% if p.financial_result == "loss" %}selected{% endif %}>Lỗ</option>
+          </select>
+        </p>
       </div>
       <div class="link-fields professional-link-fields" data-link-fields>
         <div class="field-card">
@@ -216,7 +232,7 @@
           <input type="url" name="campaign_link" value="{{ p.campaign_link }}" placeholder="https://campaign.example.com">
         </div>
         <div class="field-card">
-          <label>Link đăng ký</label>
+          <label>Link đăng nhập</label>
           <input type="url" name="registration_link_1" value="{{ p.registration_link_1 }}" placeholder="https://register.example.com">
         </div>
       </div>

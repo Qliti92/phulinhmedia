@@ -79,6 +79,15 @@ document.addEventListener("change", (event) => {
   if (event.target.matches(".project-select")) {
     syncSelectedProjectCount();
   }
+
+  if (event.target.matches("[data-select-all-tasks]")) {
+    document.querySelectorAll(".task-select").forEach((checkbox) => {
+      checkbox.checked = event.target.checked;
+    });
+    syncBulkDeleteIds("task");
+  }
+
+  if (event.target.matches(".task-select")) syncBulkDeleteIds("task");
 });
 
 document.addEventListener("keydown", (event) => {
@@ -103,6 +112,24 @@ function syncSelectedProjectCount() {
   });
   const hidden = document.querySelector("[data-bulk-project-ids]");
   if (hidden) hidden.value = getSelectedProjectIds().join(",");
+  syncBulkDeleteIds("project");
 }
+
+function syncBulkDeleteIds(type) {
+  const values = Array.from(document.querySelectorAll(`.${type}-select:checked`)).map((item) => item.value);
+  const hidden = document.querySelector(`[data-bulk-delete-ids="${type}"]`);
+  if (hidden) hidden.value = values.join(",");
+}
+
+document.querySelectorAll("[data-bulk-delete-form]").forEach((form) => {
+  form.addEventListener("submit", (event) => {
+    const type = form.dataset.bulkDeleteForm;
+    syncBulkDeleteIds(type);
+    if (!form.querySelector(`[data-bulk-delete-ids="${type}"]`).value) {
+      event.preventDefault();
+      alert("Vui lòng chọn ít nhất một mục để xóa.");
+    }
+  });
+});
 
 syncSelectedProjectCount();

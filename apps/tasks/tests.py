@@ -37,3 +37,11 @@ class TaskDeletePermissionTests(TestCase):
         response = self.client.post(reverse("task_delete", args=[task.pk]))
         self.assertEqual(response.status_code, 403)
         self.assertTrue(Task.objects.filter(pk=task.pk).exists())
+
+    def test_admin_can_bulk_delete_tasks(self):
+        first = Task.objects.create(title="Bulk one", created_by=self.manager)
+        second = Task.objects.create(title="Bulk two", created_by=self.manager)
+        self.client.force_login(self.admin)
+        response = self.client.post(reverse("task_bulk_delete"), {"task_ids": f"{first.pk},{second.pk}"})
+        self.assertRedirects(response, reverse("tasks"))
+        self.assertFalse(Task.objects.filter(pk__in=[first.pk, second.pk]).exists())

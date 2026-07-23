@@ -183,3 +183,21 @@ class TaskDeleteView(LoginRequiredMixin, View):
         task.delete()
         messages.success(request, "Đã xóa công việc.")
         return redirect("tasks")
+
+
+class BulkTaskDeleteView(LoginRequiredMixin, View):
+    def post(self, request):
+        if not request.user.is_admin_role:
+            raise PermissionDenied
+        raw_ids = request.POST.getlist("task_ids")
+        if len(raw_ids) == 1:
+            raw_ids = raw_ids[0].split(",")
+        ids = [int(pk) for pk in raw_ids if pk.strip().isdigit()]
+        tasks = Task.objects.visible_to(request.user).filter(pk__in=ids)
+        count = tasks.count()
+        tasks.delete()
+        if count:
+            messages.success(request, f"Đã xóa {count} công việc.")
+        else:
+            messages.error(request, "Vui lòng chọn ít nhất một công việc để xóa.")
+        return redirect("tasks")

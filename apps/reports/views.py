@@ -120,9 +120,19 @@ class ProjectExcelView(LoginRequiredMixin, View):
 
         wb = Workbook()
         ws = wb.active
-        ws.append(["Domain", "Manager", "Nhân viên", "Trạng thái", "Tiến độ", "Deadline", "Ngày tạo"])
+        ws.append(["Domain", "Manager", "Nhân viên", "Trạng thái", "Tiến độ", "Deadline", "Ngày tạo", "Kết quả lãi/lỗ"])
         for p in Project.objects.visible_to(request.user).select_related("manager", "staff"):
-            ws.append([p.domain, str(p.manager or ""), str(p.staff or ""), p.get_status_display(), p.progress, p.deadline, p.created_at])
+            created_at = timezone.localtime(p.created_at).replace(tzinfo=None)
+            ws.append([
+                p.domain,
+                str(p.manager or ""),
+                str(p.staff or ""),
+                p.get_status_display(),
+                p.progress,
+                p.deadline,
+                created_at,
+                p.get_financial_result_display(),
+            ])
         return excel_response(wb, "du-an.xlsx")
 
 

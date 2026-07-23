@@ -19,6 +19,12 @@
     <button class="btn">Lọc</button>
   </form>
   <div class="tool-actions">
+    {% if request.user.is_admin_role %}
+      <form method="post" action="{% url 'task_bulk_delete' %}" data-bulk-delete-form="task" onsubmit="return confirm('Bạn chắc chắn muốn xóa các công việc đã chọn?');">
+        {% csrf_token %}<input type="hidden" name="task_ids" data-bulk-delete-ids="task">
+        <button class="btn-danger" type="submit">Xóa đã chọn</button>
+      </form>
+    {% endif %}
     <a class="btn-muted" href="{% url 'export_tasks' %}">Xuất công việc</a>
     {% if bulk_form %}<button class="btn-muted" type="button" data-open-modal="bulk-task-modal">Giao hàng loạt</button>{% endif %}
     {% if request.user.is_admin_role or request.user.is_manager_role %}<a class="btn" href="{% url 'task_create' %}">Tạo công việc</a>{% endif %}
@@ -29,6 +35,7 @@
   <table class="table">
     <thead>
       <tr>
+        {% if request.user.is_admin_role %}<th class="col-check"><input type="checkbox" data-select-all-tasks></th>{% endif %}
         <th>STT</th>
         <th>Công việc</th>
         <th>Dự án</th>
@@ -42,6 +49,7 @@
     <tbody>
       {% for t in object_list %}
         <tr>
+          {% if request.user.is_admin_role %}<td class="col-check"><input type="checkbox" class="task-select" value="{{ t.pk }}"></td>{% endif %}
           <td data-label="STT">{{ page_obj.start_index|add:forloop.counter0 }}</td>
           <td data-label="Công việc">
             <div class="task-title-cell">
@@ -84,7 +92,7 @@
           </td>
         </tr>
       {% empty %}
-        <tr><td colspan="8" class="empty">Chưa có công việc</td></tr>
+        <tr><td colspan="{% if request.user.is_admin_role %}9{% else %}8{% endif %}" class="empty">Chưa có công việc</td></tr>
       {% endfor %}
     </tbody>
   </table>
